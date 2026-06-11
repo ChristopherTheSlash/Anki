@@ -1,0 +1,32 @@
+# Local configuration and secrets
+.env
+*.local
+
+# Private Anki data
+data/*
+!data/.keep/
+!data/.keep/.gitkeep
+
+# Runtime files
+logs/*
+!logs/.keep/
+!logs/.keep/.gitkeep
+run/*
+!run/.keep/
+!run/.keep/.gitkeep
+
+# Backups may contain private collection data and credentials
+backups/*
+!backups/.keep/
+!backups/.keep/.gitkeep
+
+# Python / frontend build noise for later phases
+.venv/
+__pycache__/
+*.py[cod]
+node_modules/
+dist/
+.vite/
+
+# macOS
+.DS_Store

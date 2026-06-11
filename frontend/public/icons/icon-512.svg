@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-label="Anki Review">
+  <rect width="512" height="512" rx="112" fill="#176b87"/>
+  <rect x="112" y="100" width="288" height="340" rx="38" fill="#ffffff"/>
+  <path d="M176 198h160M176 256h160M176 314h96" stroke="#176b87" stroke-width="32" stroke-linecap="round"/>
+  <circle cx="352" cy="342" r="48" fill="#9bd18b"/>
+</svg>
