@@ -1,4 +1,4 @@
-const CACHE_NAME = "anki-phone-pwa-v1";
+const CACHE_NAME = "anki-phone-pwa-v2";
 const APP_SHELL = [
   "./",
   "./manifest.webmanifest"

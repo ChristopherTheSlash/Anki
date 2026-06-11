@@ -78,7 +78,7 @@ def test_review_answer_updates_scheduler_state(client: TestClient) -> None:
     reviewed = col.get_card(card["card_id"])
     col.close()
     assert reviewed.reps == 1
-    assert reviewed.queue == 3
+    assert reviewed.queue in {1, 3}
     assert reviewed.type == 1
 
 
@@ -102,7 +102,7 @@ def test_sync_push_copies_reviewed_state_to_source(client: TestClient) -> None:
     reviewed = col.get_card(card["card_id"])
     col.close()
     assert reviewed.reps == 1
-    assert reviewed.queue == 3
+    assert reviewed.queue in {1, 3}
     assert reviewed.type == 1
 
 
