@@ -91,6 +91,20 @@ button:disabled {
   gap: 8px;
 }
 
+.sync-cluster {
+  display: grid;
+  justify-items: end;
+  gap: 6px;
+}
+
+.sync-status {
+  align-self: center;
+  color: #627086;
+  font-size: 12px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
 .status {
   min-height: 38px;
   gap: 7px;
@@ -247,16 +261,31 @@ button:disabled {
   text-align: left;
 }
 
-.deck-row span {
+.deck-name {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.deck-row strong {
-  min-width: 36px;
-  color: #526176;
+.deck-counts {
+  display: grid;
+  justify-items: end;
+  min-width: 92px;
   text-align: right;
+}
+
+.deck-counts strong {
+  color: #172033;
+  font-size: 18px;
+  line-height: 1.1;
+}
+
+.deck-counts small {
+  color: #526176;
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1.25;
+  white-space: nowrap;
 }
 
 .deck-row.selected {
@@ -276,9 +305,13 @@ button:disabled {
 
 .stats-strip {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 8px;
-  margin: 14px 0;
+  margin: 14px 0 0;
+}
+
+.session-stats {
+  margin-top: 8px;
 }
 
 .stats-strip span {
@@ -473,8 +506,13 @@ button:disabled {
   }
 
   .sync-actions,
+  .sync-cluster,
   .sync-actions .secondary-button {
     width: 100%;
+  }
+
+  .sync-cluster {
+    justify-items: stretch;
   }
 
   .stats-strip {

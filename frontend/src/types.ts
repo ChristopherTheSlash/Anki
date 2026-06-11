@@ -2,6 +2,12 @@ export type Deck = {
   id: number;
   name: string;
   card_count: number;
+  total_cards: number;
+  total_including_children: number;
+  due_count: number;
+  new_count: number;
+  learn_count: number;
+  review_count: number;
 };
 
 export type ReviewCard = {

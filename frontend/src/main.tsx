@@ -21,7 +21,7 @@ import {
   pushSync,
 } from "./api";
 import { renderCardHtml } from "./cardHtml";
-import { defaultSettings, emptyStats, loadSettings, saveSettings } from "./storage";
+import { emptyStats, loadSelectedDeckId, loadSettings, saveSelectedDeckId, saveSettings } from "./storage";
 import type { Deck, ReviewCard, SessionStats, Settings } from "./types";
 import "./styles.css";
 
@@ -33,6 +33,17 @@ const answerNames: Record<number, keyof SessionStats> = {
   3: "good",
   4: "easy",
 };
+
+function pickDeckId(decks: Deck[], preferredDeckId?: number): number | undefined {
+  if (preferredDeckId !== undefined && decks.some((deck) => deck.id === preferredDeckId)) {
+    return preferredDeckId;
+  }
+  return decks[0]?.id;
+}
+
+function syncTimestamp(label: string): string {
+  return `${label} ${new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}`;
+}
 
 function registerServiceWorker(): void {
   if ("serviceWorker" in navigator) {
@@ -65,7 +76,7 @@ function App() {
   const [draftSettings, setDraftSettings] = useState<Settings>(() => loadSettings());
   const [view, setView] = useState<View>(() => (hasApiSettings(loadSettings()) ? "review" : "settings"));
   const [decks, setDecks] = useState<Deck[]>([]);
-  const [selectedDeckId, setSelectedDeckId] = useState<number | undefined>();
+  const [selectedDeckId, setSelectedDeckId] = useState<number | undefined>(() => loadSelectedDeckId());
   const [card, setCard] = useState<ReviewCard | null>(null);
   const [questionHtml, setQuestionHtml] = useState("");
   const [answerHtml, setAnswerHtml] = useState("");
@@ -74,6 +85,7 @@ function App() {
   const [error, setError] = useState("");
   const [healthOk, setHealthOk] = useState(false);
   const [stats, setStats] = useState<SessionStats>(() => emptyStats());
+  const [syncStatus, setSyncStatus] = useState("");
   const online = useOnlineStatus();
 
   const selectedDeck = useMemo(
@@ -83,14 +95,22 @@ function App() {
 
   const clearError = () => setError("");
 
-  const loadDecks = useCallback(async () => {
+  const applyDecks = useCallback((nextDecks: Deck[], preferredDeckId?: number) => {
+    const nextSelectedDeckId = pickDeckId(nextDecks, preferredDeckId);
+    setDecks(nextDecks);
+    setSelectedDeckId(nextSelectedDeckId);
+    saveSelectedDeckId(nextSelectedDeckId);
+    return nextSelectedDeckId;
+  }, []);
+
+  const loadDecks = useCallback(async (preferredDeckId = selectedDeckId) => {
     if (!hasApiSettings(settings)) {
-      return;
+      return { decks: [] as Deck[], selectedDeckId: undefined };
     }
     const nextDecks = await getDecks(settings);
-    setDecks(nextDecks);
-    setSelectedDeckId((current) => current || nextDecks[0]?.id);
-  }, [settings]);
+    const nextSelectedDeckId = applyDecks(nextDecks, preferredDeckId);
+    return { decks: nextDecks, selectedDeckId: nextSelectedDeckId };
+  }, [applyDecks, selectedDeckId, settings]);
 
   const loadNext = useCallback(
     async (deckId = selectedDeckId) => {
@@ -119,35 +139,42 @@ function App() {
       return;
     }
     let cancelled = false;
+    const preferredDeckId = loadSelectedDeckId();
     setBusy(true);
     clearError();
-    Promise.all([getHealth(settings), loadDecks()])
-      .then(([health]) => {
-        if (!cancelled) {
-          setHealthOk(Boolean(health.ok));
+    async function initializeReview() {
+      try {
+        const [health, nextDecks] = await Promise.all([getHealth(settings), getDecks(settings)]);
+        if (cancelled) {
+          return;
         }
-      })
-      .catch((err) => {
+        setHealthOk(Boolean(health.ok));
+        const nextSelectedDeckId = applyDecks(nextDecks, preferredDeckId);
+        if (nextSelectedDeckId !== undefined) {
+          const nextCard = await getNextCard(settings, nextSelectedDeckId);
+          if (!cancelled) {
+            setCard(nextCard);
+            setShowAnswer(false);
+            setQuestionHtml("");
+            setAnswerHtml("");
+          }
+        }
+      } catch (err) {
         if (!cancelled) {
           setHealthOk(false);
           setError(err instanceof Error ? err.message : "Could not reach the API.");
         }
-      })
-      .finally(() => {
+      } finally {
         if (!cancelled) {
           setBusy(false);
         }
-      });
+      }
+    }
+    void initializeReview();
     return () => {
       cancelled = true;
     };
-  }, [loadDecks, settings]);
-
-  useEffect(() => {
-    if (selectedDeckId) {
-      void loadNext(selectedDeckId);
-    }
-  }, [loadNext, selectedDeckId]);
+  }, [applyDecks, settings]);
 
   useEffect(() => {
     if (!card) {
@@ -179,8 +206,10 @@ function App() {
     clearError();
     try {
       await pullSync(settings);
-      await loadDecks();
-      await loadNext();
+      const refreshed = await loadDecks(selectedDeckId);
+      setStats(emptyStats());
+      await loadNext(refreshed.selectedDeckId);
+      setSyncStatus(syncTimestamp("Pulled"));
     } catch (err) {
       setError(err instanceof Error ? err.message : "Sync pull failed.");
     } finally {
@@ -193,8 +222,9 @@ function App() {
     clearError();
     try {
       await pushSync(settings);
-      await loadDecks();
-      await loadNext();
+      const refreshed = await loadDecks(selectedDeckId);
+      await loadNext(refreshed.selectedDeckId);
+      setSyncStatus(syncTimestamp("Pushed"));
     } catch (err) {
       setError(err instanceof Error ? err.message : "Sync push failed.");
     } finally {
@@ -216,7 +246,8 @@ function App() {
         answered: current.answered + 1,
         [key]: Number(current[key]) + 1,
       }));
-      await loadNext();
+      const refreshed = await loadDecks(selectedDeckId);
+      await loadNext(refreshed.selectedDeckId);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not submit the answer.");
     } finally {
@@ -226,8 +257,10 @@ function App() {
 
   const chooseDeck = (deckId: number) => {
     setSelectedDeckId(deckId);
+    saveSelectedDeckId(deckId);
     setCard(null);
     setStats(emptyStats());
+    void loadNext(deckId);
   };
 
   const statusLabel = online ? (healthOk ? "Connected" : "API check needed") : "Offline";
@@ -306,8 +339,13 @@ function App() {
                   type="button"
                   onClick={() => chooseDeck(deck.id)}
                 >
-                  <span>{deck.name}</span>
-                  <strong>{deck.card_count}</strong>
+                  <span className="deck-name">{deck.name}</span>
+                  <span className="deck-counts">
+                    <strong>{deck.due_count}</strong>
+                    <small>
+                      {deck.new_count} new / {deck.learn_count} learn / {deck.review_count} review
+                    </small>
+                  </span>
                 </button>
               ))}
               {!decks.length && !busy && <p className="empty-copy">No decks loaded.</p>}
@@ -320,21 +358,33 @@ function App() {
                 <p className="eyebrow">{selectedDeck?.name || "Review queue"}</p>
                 <h2>{card ? `Card ${card.card_id}` : "Ready"}</h2>
               </div>
-              <div className="sync-actions">
-                <button className="secondary-button" type="button" onClick={handlePull} disabled={busy || !hasApiSettings(settings)}>
-                  {busy ? <Loader2 className="spin" size={18} /> : <RefreshCcw size={18} />}
-                  Pull
-                </button>
-                <button className="secondary-button" type="button" onClick={handlePush} disabled={busy || !hasApiSettings(settings)}>
-                  {busy ? <Loader2 className="spin" size={18} /> : <Cloud size={18} />}
-                  Push
-                </button>
+              <div className="sync-cluster">
+                <div className="sync-actions">
+                  <button className="secondary-button" type="button" onClick={handlePull} disabled={busy || !hasApiSettings(settings)}>
+                    {busy ? <Loader2 className="spin" size={18} /> : <RefreshCcw size={18} />}
+                    Pull
+                  </button>
+                  <button className="secondary-button" type="button" onClick={handlePush} disabled={busy || !hasApiSettings(settings)}>
+                    {busy ? <Loader2 className="spin" size={18} /> : <Cloud size={18} />}
+                    Push
+                  </button>
+                </div>
+                {syncStatus && <span className="sync-status">{syncStatus}</span>}
               </div>
             </div>
 
-            <div className="stats-strip" aria-label="Session stats">
+            <div className="stats-strip deck-stats" aria-label="Deck stats">
+              <span><strong>{selectedDeck?.due_count ?? 0}</strong> due</span>
+              <span><strong>{selectedDeck?.new_count ?? 0}</strong> new</span>
+              <span><strong>{selectedDeck?.learn_count ?? 0}</strong> learn</span>
+              <span><strong>{selectedDeck?.review_count ?? 0}</strong> review</span>
+              <span><strong>{selectedDeck?.total_including_children ?? 0}</strong> total</span>
+            </div>
+
+            <div className="stats-strip session-stats" aria-label="Session stats">
               <span><strong>{stats.answered}</strong> done</span>
               <span><strong>{stats.again}</strong> again</span>
+              <span><strong>{stats.hard}</strong> hard</span>
               <span><strong>{stats.good}</strong> good</span>
               <span><strong>{stats.easy}</strong> easy</span>
             </div>

@@ -106,8 +106,11 @@ On the phone:
 4. Set the API URL to the Tailscale HTTPS or private HTTPS URL.
 5. Set the API token from `ANKI_API_TOKEN`.
 6. Save settings and confirm health/decks load.
-7. Open a low-risk deck and answer one review card.
-8. Add the page to the home screen and reopen it as a PWA.
+7. Confirm the selected deck shows due, new, learning, review, and total counts.
+8. Open a low-risk deck and answer one review card.
+9. Confirm the deck counts and session stats update after the answer.
+10. Close Anki Desktop, push from the phone app, then confirm a backup appears under `data/backups`.
+11. Add the page to the home screen and reopen it as a PWA.
 
 Do not use the plain `http://127.0.0.1:8090` URL on the phone. On a phone, `127.0.0.1` means the phone itself, not the Mac.
 
@@ -118,5 +121,7 @@ The phone path is complete when:
 - The hosted GitHub Pages app opens on the phone.
 - The settings screen reaches `/health` through HTTPS.
 - The deck list loads through the private API.
+- Per-deck due/new/learning/review counts appear and refresh after answering.
 - A card can be reviewed from the phone.
+- Pull and push complete, and push creates a desktop-collection backup.
 - Reopening from the home screen still keeps the configured API URL and token.

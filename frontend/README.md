@@ -30,7 +30,8 @@ npm run build
 - Review queue
 - Card front/back
 - Answer buttons
-- Session stats
+- Deck due/new/learning/review stats
+- Session answer stats
 - Offline/error state
 - Settings
 
@@ -45,11 +46,12 @@ scripts/start-anki-api.sh
 The app expects:
 
 - `GET /health`
-- `GET /decks`
+- `GET /decks` with total, due, new, learning, and review counts
 - `GET /review/next?deck_id=...`
 - `POST /review/:card_id/answer`
 - `GET /media/:filename`
 - `POST /sync/pull`
+- `POST /sync/push`
 
 If `ANKI_API_TOKEN` is set, enter that token in the PWA settings screen.
 

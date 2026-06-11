@@ -119,9 +119,9 @@ Do not expose the plain sync server directly to the public internet.
 
 For the phone PWA, follow the validation checklist in `docs/PHONE_VALIDATION.md`. The hosted GitHub Pages app needs the private API to be reachable over HTTPS; Tailscale HTTPS is the recommended first setup.
 
-## 7. Private Review API Prototype
+## 7. Private Review API
 
-The API prototype uses FastAPI and Anki's official Python package. It copies the configured desktop collection into a private API workdir before opening it.
+The API uses FastAPI and Anki's official Python package. It copies the configured desktop collection into a private API workdir before opening it.
 
 ```sh
 scripts/start-anki-api.sh

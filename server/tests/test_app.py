@@ -57,6 +57,12 @@ def test_review_answer_updates_scheduler_state(client: TestClient) -> None:
     decks = client.get("/decks", headers=auth_headers()).json()
     test_deck = next(deck for deck in decks if deck["name"] == "Test Deck")
     assert test_deck["card_count"] == 1
+    assert test_deck["total_cards"] == 1
+    assert test_deck["total_including_children"] == 1
+    assert test_deck["due_count"] == 1
+    assert test_deck["new_count"] == 1
+    assert test_deck["learn_count"] == 0
+    assert test_deck["review_count"] == 0
 
     card = client.get(
         f"/review/next?deck_id={test_deck['id']}",

@@ -36,4 +36,4 @@ npm --prefix frontend run build
 2. Start the API and check `/health`.
 3. Fetch decks from the PWA settings screen or with `curl`.
 4. Review one low-risk card through the API working copy.
-5. Keep `/sync/push` disabled until conflict-safe writeback is designed.
+5. Push a low-risk reviewed card only after closing Anki Desktop, then confirm `/sync/push` creates a backup and the desktop collection reflects the review.

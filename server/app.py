@@ -56,6 +56,12 @@ class DeckOut(BaseModel):
     id: int
     name: str
     card_count: int
+    total_cards: int
+    total_including_children: int
+    due_count: int
+    new_count: int
+    learn_count: int
+    review_count: int
 
 
 class ReviewCardOut(BaseModel):
@@ -255,12 +261,60 @@ def sync_push(_: Auth) -> PushOut:
 @app.get("/decks", response_model=list[DeckOut])
 def decks(_: Auth) -> list[DeckOut]:
     col = store.collection()
+    due_by_deck = deck_due_counts(col)
     output: list[DeckOut] = []
     for deck in col.decks.all_names_and_ids():
         deck_id = int(deck.id)
-        card_count = len(col.find_cards(f'deck:"{deck.name}"'))
-        output.append(DeckOut(id=deck_id, name=deck.name, card_count=card_count))
+        counts = due_by_deck.get(deck_id, empty_deck_counts())
+        output.append(
+            DeckOut(
+                id=deck_id,
+                name=deck.name,
+                card_count=counts["total_cards"],
+                total_cards=counts["total_cards"],
+                total_including_children=counts["total_including_children"],
+                due_count=counts["due_count"],
+                new_count=counts["new_count"],
+                learn_count=counts["learn_count"],
+                review_count=counts["review_count"],
+            )
+        )
     return output
+
+
+def empty_deck_counts() -> dict[str, int]:
+    return {
+        "total_cards": 0,
+        "total_including_children": 0,
+        "due_count": 0,
+        "new_count": 0,
+        "learn_count": 0,
+        "review_count": 0,
+    }
+
+
+def deck_due_counts(col: Collection) -> dict[int, dict[str, int]]:
+    counts_by_deck: dict[int, dict[str, int]] = {}
+
+    def visit(node) -> None:
+        deck_id = int(node.deck_id)
+        if deck_id:
+            new_count = int(node.new_count)
+            learn_count = int(node.learn_count)
+            review_count = int(node.review_count)
+            counts_by_deck[deck_id] = {
+                "total_cards": int(node.total_in_deck),
+                "total_including_children": int(node.total_including_children),
+                "due_count": new_count + learn_count + review_count,
+                "new_count": new_count,
+                "learn_count": learn_count,
+                "review_count": review_count,
+            }
+        for child in node.children:
+            visit(child)
+
+    visit(col.sched.deck_due_tree())
+    return counts_by_deck
 
 
 @app.get("/review/next", response_model=ReviewCardOut | None)
