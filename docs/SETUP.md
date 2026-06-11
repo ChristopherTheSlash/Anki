@@ -117,6 +117,8 @@ Prefer Tailscale. Set `SYNC_HOST` to a Tailscale or LAN-reachable address only w
 
 Do not expose the plain sync server directly to the public internet.
 
+For the phone PWA, follow the validation checklist in `docs/PHONE_VALIDATION.md`. The hosted GitHub Pages app needs the private API to be reachable over HTTPS; Tailscale HTTPS is the recommended first setup.
+
 ## 7. Private Review API Prototype
 
 The API prototype uses FastAPI and Anki's official Python package. It copies the configured desktop collection into a private API workdir before opening it.
@@ -168,7 +170,18 @@ For local browser testing, set:
 ANKI_API_CORS_ORIGINS=http://localhost:5173,http://127.0.0.1:5173
 ```
 
-For GitHub Pages, add the final Pages URL to `ANKI_API_CORS_ORIGINS`.
+For GitHub Pages, add the final Pages origin to `ANKI_API_CORS_ORIGINS`:
+
+```sh
+ANKI_API_CORS_ORIGINS=http://localhost:5173,http://127.0.0.1:5173,https://christophertheslash.github.io
+```
+
+The API also supports:
+
+```sh
+ANKI_API_RATE_LIMIT_PER_MINUTE=120
+ANKI_API_LOG_LEVEL=INFO
+```
 
 ## 9. GitHub Pages Deployment
 
@@ -184,3 +197,23 @@ After creating the GitHub repository:
 If this is a project Pages site, the workflow sets `VITE_BASE_PATH` to `/<repository-name>/`. If this is a user or organization Pages site such as `username.github.io`, change `VITE_BASE_PATH` in the workflow to `/`.
 
 The hosted app still calls your private API directly from the phone browser. Use HTTPS for that API endpoint. Tailscale HTTPS is the recommended first path.
+
+See `docs/PHONE_VALIDATION.md` for the phone checklist, Tailscale HTTPS commands, and macOS Shortcuts recipes.
+
+## 10. Optional Daily Backups
+
+The template at `launchagents/local.anki-private-backup.plist.template` runs `scripts/backup-anki-private-server.sh` every day at 04:15.
+
+Install it manually after replacing `__PROJECT_DIR__` with this project path:
+
+```sh
+sed "s#__PROJECT_DIR__#$(pwd)#g" launchagents/local.anki-private-backup.plist.template > ~/Library/LaunchAgents/local.anki-private-backup.plist
+launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/local.anki-private-backup.plist
+launchctl print gui/$(id -u)/local.anki-private-backup
+```
+
+Unload it with:
+
+```sh
+launchctl bootout gui/$(id -u) ~/Library/LaunchAgents/local.anki-private-backup.plist
+```

@@ -41,6 +41,7 @@ jobs:
         run: npm run build
         env:
           VITE_BASE_PATH: /${{ github.event.repository.name }}/
+          VITE_DEFAULT_API_URL: https://christophers-mac-mini.tailcbe0f0.ts.net
 
       - name: Configure Pages
         uses: actions/configure-pages@v5

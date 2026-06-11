@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>local.anki-private-api</string>
+
+  <key>ProgramArguments</key>
+  <array>
+    <string>/bin/bash</string>
+    <string>-lc</string>
+    <string>cd "__API_RUNTIME_DIR__" &amp;&amp; set -a &amp;&amp; source "__RUNTIME_DIR__/.env" &amp;&amp; set +a &amp;&amp; exec "__API_RUNTIME_DIR__/.venv/bin/python" -m uvicorn server.app:app --host "${ANKI_API_HOST:-127.0.0.1}" --port "${ANKI_API_PORT:-8090}" --app-dir "__API_RUNTIME_DIR__"</string>
+  </array>
+
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>ANKI_ENV_FILE</key>
+    <string>__RUNTIME_DIR__/.env</string>
+  </dict>
+
+  <key>RunAtLoad</key>
+  <true/>
+
+  <key>KeepAlive</key>
+  <true/>
+
+  <key>StandardOutPath</key>
+  <string>__RUNTIME_DIR__/logs/anki-private-api.launchd.log</string>
+
+  <key>StandardErrorPath</key>
+  <string>__RUNTIME_DIR__/logs/anki-private-api.launchd.err.log</string>
+</dict>
+</plist>

@@ -3,7 +3,7 @@ import type { SessionStats, Settings } from "./types";
 const SETTINGS_KEY = "anki-phone-pwa.settings";
 
 export const defaultSettings: Settings = {
-  apiUrl: "",
+  apiUrl: import.meta.env.VITE_DEFAULT_API_URL || "",
   token: "",
 };
 

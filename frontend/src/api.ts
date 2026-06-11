@@ -79,6 +79,10 @@ export function pullSync(settings: Settings): Promise<{ collection: string; copi
   return apiFetch(settings, "/sync/pull", { method: "POST" });
 }
 
+export function pushSync(settings: Settings): Promise<{ collection: string; copied_to: string; backup: string }> {
+  return apiFetch(settings, "/sync/push", { method: "POST" });
+}
+
 export function getNextCard(settings: Settings, deckId?: number): Promise<ReviewCard | null> {
   const path = deckId ? `/review/next?deck_id=${encodeURIComponent(deckId)}` : "/review/next";
   return apiFetch(settings, path);

@@ -18,6 +18,7 @@ import {
   getNextCard,
   hasApiSettings,
   pullSync,
+  pushSync,
 } from "./api";
 import { renderCardHtml } from "./cardHtml";
 import { defaultSettings, emptyStats, loadSettings, saveSettings } from "./storage";
@@ -187,6 +188,20 @@ function App() {
     }
   };
 
+  const handlePush = async () => {
+    setBusy(true);
+    clearError();
+    try {
+      await pushSync(settings);
+      await loadDecks();
+      await loadNext();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Sync push failed.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
   const submitAnswer = async (ease: number) => {
     if (!card) {
       return;
@@ -263,7 +278,7 @@ function App() {
               API token
               <input
                 type="password"
-                placeholder="Bearer token from .env"
+                placeholder="Optional"
                 value={draftSettings.token}
                 onChange={(event) => setDraftSettings((current) => ({ ...current, token: event.target.value }))}
               />
@@ -305,10 +320,16 @@ function App() {
                 <p className="eyebrow">{selectedDeck?.name || "Review queue"}</p>
                 <h2>{card ? `Card ${card.card_id}` : "Ready"}</h2>
               </div>
-              <button className="secondary-button" type="button" onClick={handlePull} disabled={busy || !hasApiSettings(settings)}>
-                {busy ? <Loader2 className="spin" size={18} /> : <RefreshCcw size={18} />}
-                Pull
-              </button>
+              <div className="sync-actions">
+                <button className="secondary-button" type="button" onClick={handlePull} disabled={busy || !hasApiSettings(settings)}>
+                  {busy ? <Loader2 className="spin" size={18} /> : <RefreshCcw size={18} />}
+                  Pull
+                </button>
+                <button className="secondary-button" type="button" onClick={handlePush} disabled={busy || !hasApiSettings(settings)}>
+                  {busy ? <Loader2 className="spin" size={18} /> : <Cloud size={18} />}
+                  Push
+                </button>
+              </div>
             </div>
 
             <div className="stats-strip" aria-label="Session stats">

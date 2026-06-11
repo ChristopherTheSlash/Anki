@@ -161,7 +161,7 @@ Minimum backup commands:
 - [x] Create LaunchAgent plist.
 - [x] Test `launchctl` start/stop.
 - [x] Create clickable `.command` wrappers.
-- [ ] Create macOS Shortcuts entries.
+- [x] Document macOS Shortcuts entries.
 - [x] Add status notification output.
 
 ### Phase 3: Backup System
@@ -170,7 +170,7 @@ Minimum backup commands:
 - [x] Write restore dry-run script.
 - [x] Test a backup archive.
 - [x] Add backup before destructive operations.
-- [ ] Optional: schedule daily backups with LaunchAgent.
+- [x] Optional: schedule daily backups with LaunchAgent template.
 
 ## Current Runtime Status
 
@@ -193,7 +193,7 @@ Minimum backup commands:
 - [x] Submit answer and update scheduling.
 - [x] Serve media.
 - [x] Add token authentication.
-- [ ] Add API tests around scheduling behavior.
+- [x] Add API tests around scheduling behavior.
 
 ### Phase 5: Phone PWA
 
@@ -206,6 +206,7 @@ Minimum backup commands:
 - [x] Add service worker.
 - [x] Test on desktop browser.
 - [ ] Test on phone browser over private network.
+- [x] Add phone/private-network validation checklist.
 
 ### Phase 6: GitHub Pages
 
@@ -219,13 +220,13 @@ Minimum backup commands:
 
 ### Phase 7: Hardening
 
-- [ ] Add HTTPS reverse proxy if not using Tailscale HTTPS.
-- [ ] Add rate limiting.
-- [ ] Add CORS allowlist for the GitHub Pages domain.
-- [ ] Add structured logs.
-- [ ] Add health checks.
-- [ ] Add version pinning for Anki/server compatibility.
-- [ ] Add upgrade checklist.
+- [x] Document HTTPS access path with Tailscale HTTPS/reverse-proxy fallback.
+- [x] Add rate limiting.
+- [x] Add CORS allowlist for the GitHub Pages domain.
+- [x] Add structured logs.
+- [x] Add health checks.
+- [x] Add version pinning for Anki/server compatibility.
+- [x] Add upgrade checklist.
 
 ## Open Decisions
 

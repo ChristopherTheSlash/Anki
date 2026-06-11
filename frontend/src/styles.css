@@ -86,6 +86,11 @@ button:disabled {
   gap: 8px;
 }
 
+.sync-actions {
+  display: flex;
+  gap: 8px;
+}
+
 .status {
   min-height: 38px;
   gap: 7px;
@@ -464,6 +469,12 @@ button:disabled {
 
   .review-toolbar {
     align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .sync-actions,
+  .sync-actions .secondary-button {
+    width: 100%;
   }
 
   .stats-strip {
