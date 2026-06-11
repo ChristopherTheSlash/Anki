@@ -179,6 +179,9 @@ Minimum backup commands:
 - Active sync data: `/Users/christopherwang/Library/Application Support/AnkiPrivateServer/data/syncserver`
 - First verified desktop sync: `2026-06-12 02:52 Asia/Taipei`
 - Latest post-sync backup: `/Users/christopherwang/Library/Application Support/AnkiPrivateServer/backups/anki-private-server-20260612-025410.tar.gz`
+- GitHub repository: `https://github.com/ChristopherTheSlash/Anki`
+- GitHub Pages app: `https://christophertheslash.github.io/Anki/`
+- Latest verified Pages deploy: `2026-06-12 03:16 Asia/Taipei`
 
 ### Phase 4: API Prototype
 
@@ -206,10 +209,11 @@ Minimum backup commands:
 
 ### Phase 6: GitHub Pages
 
-- [ ] Create GitHub repository.
+- [x] Create GitHub repository.
 - [x] Add frontend deploy workflow.
 - [x] Ensure no private data is committed.
-- [ ] Configure GitHub Pages.
+- [x] Configure GitHub Pages.
+- [x] Verify the hosted app loads from GitHub Pages.
 - [ ] Verify the hosted app loads on phone.
 - [ ] Verify it can reach the private API over HTTPS/VPN.
 
